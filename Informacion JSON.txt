@@ -1,0 +1,173 @@
+Buscar informacion sobre json para qt
+
+Documentacion QT sobre JSON: https://doc.qt.io/qt-5/json.html
+
+Tipos de datos: bool, double, string, array, object, null.
+
+Ejemplo JSON
+{
+//String
+    "FirstName": "John",
+    "LastName": "Doe",
+
+//Double    
+	"Age": 43,
+    
+//Objeto
+	"Address": {
+        "Street": "Downing Street 10",
+        "City": "London",
+        "Country": "Great Britain"
+    },
+	
+//Array	
+    "Phone numbers": [
+        "+44 1234567",
+        "+44 2345678"
+    ]
+}
+
+JSON simpre empiezan con un { (objeto) o [ (Array)
+
+
+*Documentacion QT sobre lectura y escritura de JSON https://doc.qt.io/qt-5/qjsondocument.html
+
+
+
+
+
+
+QT JSON WRITE Ejemplo: (https://www.youtube.com/watch?v=lbqLY2czzfc)
+----------------------------------------------------
+QJsonObject jso1 {
+	{"id", 1},
+	{"name", "Maria},
+	{"senha", "12345"}
+};
+
+QJsonArray js array {jso1};
+
+QJsonDocument jsdoc(jsarray);
+
+QFile file1("C:/Users/Jose/Desktop/array.json");
+	
+Q_ASSERT(file1.open(QFile::WriteOnly));
+
+file1.write(jsdoc.toJson());
+-----------------------------------------------------
+
+
+
+	
+QT JSON READ Ejemplo 1: (https://stackoverflow.com/questions/15893040/how-to-create-read-write-json-files-in-qt5)
+
+---------------JSON--------------------
+{
+   "appDesc": {
+      "description": "SomeDescription",
+      "message": "SomeMessage"
+   },
+   "appName": {
+      "description": "Home",
+      "message": "Welcome",
+      "imp":["awesome","best","good"]
+   }
+}
+---------------------------------------
+
+---------------CODIGO QT---------------
+
+void readJson()
+   {
+      QString val;
+      QFile file;
+      file.setFileName("test.json");
+      file.open(QIODevice::ReadOnly | QIODevice::Text);
+      val = file.readAll();
+      file.close();
+      qWarning() << val;
+      QJsonDocument d = QJsonDocument::fromJson(val.toUtf8());
+      QJsonObject sett2 = d.object();
+      QJsonValue value = sett2.value(QString("appName"));
+      qWarning() << value;
+      QJsonObject item = value.toObject();
+      qWarning() << tr("QJsonObject of description: ") << item;
+
+      /* in case of string value get value and convert into string*/
+      qWarning() << tr("QJsonObject[appName] of description: ") << item["description"];
+      QJsonValue subobj = item["description"];
+      qWarning() << subobj.toString();
+
+      /* in case of array get array and convert into string*/
+      qWarning() << tr("QJsonObject[appName] of value: ") << item["imp"];
+      QJsonArray test = item["imp"].toArray();
+      qWarning() << test[1].toString();
+   }
+---------------------------------------------------------------------------------------------------------------------
+   
+   
+QT JSON READ Ejemplo 2: (http://erickveil.github.io/2016/04/06/How-To-Manipulate-JSON-With-C++-and-Qt.html)
+-------------------------------------------------------------
+
+//Carga el archivo y lo pasa a QByteArray
+QFile file_obj(file_path);
+if(!file_obj.open(QIODevice::ReadOnly)){
+    qDebug()<<"Failed to open "<<file_path;
+    exit(1);
+}
+
+QTextStream file_text(&file_obj);
+QString json_string;
+json_string = file_text.readAll();
+file_obj.close();
+QByteArray json_bytes = json_string.toLocal8Bit();
+
+
+//Load into a QJsonDocument then convert that to QJsonObject
+auto json_doc=QJsonDocument::fromJSON(json_bytes);
+
+if(json_doc.isNull()){
+    qDebug()<<"Failed to create JSON doc.";
+    exit(2);
+}
+if(!json_doc.isObject()){
+    qDebug()<<"JSON is not an object.";
+    exit(3);
+}
+
+QJsonObject json_obj=json_doc.object();
+
+if(json_obj.isEmpty()){
+    qDebug()<<"JSON object is empty.";
+    exit(4);
+}
+
+//Access the data 
+
+QVariantMap json_map = json_obj.toVariantMap();
+
+qDebug()<< json_map["name"].toString();
+qDebug()<< json_map["str"].toInt();
+qDebug()<< json_map["enemy"].toString();
+------------------------------------------------------------------------------
+
+
+QT JSON WRITE Ejemplo 2: (http://erickveil.github.io/2016/04/06/How-To-Manipulate-JSON-With-C++-and-Qt.html)
+----------------------------------------
+QJsonObject json_obj;
+json_obj["name"] = "Thor";
+json_obj["str"] = 34;
+json_obj["enemy"] = "Loki";
+
+QJsonDocument json_doc(json_obj);
+QString json_string = json_doc.toJSON();
+
+QFile save_file(file_path);
+if(!save_file.open(QIODevice::WriteOnly)){
+    gDebug() << "failed to open save file");
+    exit();
+}
+save_file.write(json_string.toLocal8Bit());
+save_file.close(); 
+
+------------------------------------------------------------------------------
